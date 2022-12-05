@@ -29,20 +29,16 @@
  *                                                    //  Ask her again.';
  */
 function willYouMarryMe(isPositiveAnswer) {
-  try {
-    return new Promise((res, rej) => {
-      if (isPositiveAnswer === true) {
-        res('Hooray!!! She said "Yes"!');
-      } else
-      if (isPositiveAnswer === false) {
-        res('Oh no, she said "No".');
-      } else {
-        rej(new Error('Error: Wrong parameter is passed!'));
-      }
-    });
-  } catch (error) {
-    return 'Error: Wrong parameter is passed!';
-  }
+  return new Promise((res, rej) => {
+    if (isPositiveAnswer === true) {
+      res('Hooray!!! She said "Yes"!');
+    } else
+    if (isPositiveAnswer === false) {
+      res('Oh no, she said "No".');
+    } else {
+      rej(new Error('Wrong parameter is passed! Ask her again.'));
+    }
+  });
 }
 // const p1 = willYouMarryMe();
 // p1.then(answer => console.log(answer))
@@ -62,8 +58,22 @@ function willYouMarryMe(isPositiveAnswer) {
  *    })
  *
  */
-function processAllPromises(/* array */) {
-  throw new Error('Not implemented');
+function processAllPromises(array) {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    let completed = 0;
+
+    array.forEach((value, index) => {
+      value.then((result) => {
+        results[index] = result;
+        completed += 1;
+
+        if (completed === array.length) {
+          resolve(results);
+        }
+      }).catch((err) => reject(err));
+    });
+  });
 }
 
 /**
@@ -85,8 +95,12 @@ function processAllPromises(/* array */) {
  *    })
  *
  */
-function getFastestPromise(/* array */) {
-  throw new Error('Not implemented');
+function getFastestPromise(array) {
+  return new Promise((resolve, reject) => {
+    array.forEach((value) => {
+      value.then((res) => resolve(res)).catch((reason) => reject(reason));
+    });
+  });
 }
 
 /**
@@ -106,8 +120,32 @@ function getFastestPromise(/* array */) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
+function chainPromises(array, action) {
+  return new Promise((resolve) => {
+    let actionResults;
+    let completed = 0;
+
+    array.forEach((value) => {
+      value.then((result) => {
+        if (!actionResults) {
+          actionResults = result;
+        } else {
+          actionResults = action(actionResults, result);
+        }
+        completed += 1;
+
+        if (completed === array.length) {
+          resolve(actionResults);
+        }
+      }).catch(() => {
+        completed += 1;
+
+        if (completed === array.length) {
+          resolve(actionResults);
+        }
+      });
+    });
+  });
 }
 
 module.exports = {
